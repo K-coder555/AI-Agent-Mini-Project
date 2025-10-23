@@ -1399,7 +1399,7 @@ def structure_node(state: AgentState) -> AgentState:
     # Markdown 형식으로 보고서 구조화
     final_report = f"""
 
-# 2026-2030 Physical AI 산업 트렌드 분석 보고서
+# 2026-2030 AI 산업 트렌드 분석 보고서
 
 ## 핵심 요약
 
