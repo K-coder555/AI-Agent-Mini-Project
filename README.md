@@ -42,7 +42,7 @@
 ### **전문적인 PDF 보고서**
 - A4 사이즈, 한글 지원
 - 다채로운 색상 팔레트와 공식 문서 스타일
-- 목차, 본문, 결론, 참고자료, 품질 평가 포함
+- 요약, 본문, 결론, 참고자료, 품질 평가 포함
 - 페이지 번호, 생성일, 출처 자동 삽입
 
 ### **병렬 처리 및 최적화**
@@ -363,8 +363,8 @@ python Agent.py
 
 ### PDF 보고서 샘플
 
-<img src="physical_ai_report_20251023_142214.pdf" width="400" alt="PDF 보고서">
-<img src="physical_ai_report_20251023_142214.md" width="400" alt="Markdown 보고서">
+<img src="Physical_ai_report_20251023_155127.pdf" width="400" alt="PDF 보고서">
+<img src="Physical_ai_report_20251023_155127.md" width="400" alt="Markdown 보고서">
 
 
 *실제 에이전트가 생성한 보고서 입니다.*
