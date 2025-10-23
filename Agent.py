@@ -73,26 +73,43 @@ class NumberedCanvas(canvas.Canvas):
         canvas.Canvas.__init__(self, *args, **kwargs)
         self._saved_page_states = []
         
+    # def showPage(self):
+    #     self._saved_page_states.append(dict(self.__dict__))
+    #     self._startPage()
+        
     def showPage(self):
-        self._saved_page_states.append(dict(self.__dict__))
-        self._startPage()
-        
-    def save(self):
-        num_pages = len(self._saved_page_states)
-        for state in self._saved_page_states:
-            self.__dict__.update(state)
-            self.draw_page_number(num_pages)
-            canvas.Canvas.showPage(self)
-        canvas.Canvas.save(self)
-        
-    def draw_page_number(self, page_count):
-        """페이지 번호 그리기"""
+        """페이지를 저장하기 전에 페이지 번호 그리기"""
         page_num = self._pageNumber
+        
+        # 첫 페이지가 아니면 페이지 번호 그리기
         if page_num > 1:
+            self.saveState()  # 현재 상태 저장
             self.setFont(KOREAN_FONT, 9)
             self.setFillColor(colors.grey)
-            self.drawRightString(A4[0] - 50, 25, f"Page {page_num - 1} of {page_count - 1}")
+            # 우측 하단
+            self.drawRightString(A4[0] - 50, 25, f"Page {page_num - 1}")
+            # 좌측 하단
             self.drawString(50, 25, "Physical AI Trend Report")
+            self.restoreState()  # 상태 복원
+        
+        # 실제 페이지 저장
+        canvas.Canvas.showPage(self)
+    # def save(self):
+    #     num_pages = len(self._saved_page_states)
+    #     for state in self._saved_page_states:
+    #         self.__dict__.update(state)
+    #         self.draw_page_number(num_pages)
+    #         canvas.Canvas.showPage(self)
+    #     canvas.Canvas.save(self)
+        
+    # def draw_page_number(self, page_count):
+    #     """페이지 번호 그리기"""
+    #     page_num = self._pageNumber
+    #     if page_num > 1:
+    #         self.setFont(KOREAN_FONT, 9)
+    #         self.setFillColor(colors.grey)
+    #         self.drawRightString(A4[0] - 50, 25, f"Page {page_num - 1} of {page_count - 1}")
+    #         self.drawString(50, 25, "Physical AI Trend Report")
 
 
 def clean_markdown_symbols(text):
@@ -507,9 +524,9 @@ Physical AI 시장은 2024년 3.78억 달러에서 2034년 67.91억 달러로 �
 - 주요 성장 동력: 자동화 수요 증가, AI 칩 성능 향상, 클라우드 로보틱스 발전
 
 기술 트렌드
-1. **Vision-Language-Action (VLA) 모델**: Google의 RT-2, 1X의 EVE 등 멀티모달 foundation model이 로봇의 범용 작업 수행 능력을 획기적으로 향상
-2. **World Foundation Models**: NVIDIA Cosmos, Google Genesis 등 물리 시뮬레이션 기반 합성 데이터 생성으로 학습 데이터 부족 문제 해결
-3. **엣지 AI 가속화**: Qualcomm RB6, NVIDIA Jetson Orin을 통한 온디바이스 추론으로 실시간 반응성 30% 개선
+1. Vision-Language-Action (VLA) 모델: Google의 RT-2, 1X의 EVE 등 멀티모달 foundation model이 로봇의 범용 작업 수행 능력을 획기적으로 향상
+2. World Foundation Models: NVIDIA Cosmos, Google Genesis 등 물리 시뮬레이션 기반 합성 데이터 생성으로 학습 데이터 부족 문제 해결
+3. 엣지 AI 가속화: Qualcomm RB6, NVIDIA Jetson Orin을 통한 온디바이스 추론으로 실시간 반응성 30% 개선
 
 산업별 적용 사례
 제조: Figure AI와 BMW 협력 사례 - South Carolina 공장에서 Figure 02 휴머노이드가 부품 조립 작업을 수행하며 생산성 25% 향상, 품질 불량률 15% 감소 (2024년 3분기 실증 결과)
@@ -537,7 +554,7 @@ Physical AI 시장은 2024년 3.78억 달러에서 2034년 67.91억 달러로 �
 REVIEW_FEW_SHOT_PROMPT = ChatPromptTemplate.from_messages([
     ("system", """당신은 Physical AI 전문 감수자입니다. 아래 5가지 기준(각 20점, 총 100점)으로 평가하고, 0-10점 사이 점수를 부여하세요.
 
-**평가 기준:**
+평가 기준:
 
 A. 내용 완성도 (20점)
 - 18-20점: 모든 핵심 질문을 깊이 있게 다루며 추가 인사이트 제공
@@ -569,7 +586,7 @@ E. 전문성 (20점)
 - 10-13점: 일반적 수준의 분석
 - 0-9점: 전문성 결여
 
-**응답 형식:**
+응답 형식:
 점수: x.x/10 (총점: yy/100)
 
 세부 평가:
@@ -1218,9 +1235,9 @@ def quality_check_node(state: AgentState) -> str:
     return "generate_report"
 
 def report_generation_node(state: AgentState) -> AgentState:
-    """보고서 초안 생성"""
-    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.5)
-    
+    """보고서 초안 생성 - 공식적이고 정형화된 트렌드 분석 보고서 양식"""
+    llm = ChatOpenAI(model="gpt-4", temperature=0.2)
+
     sections = {
         "executive_summary": "핵심 요약",
         "market_overview": "시장 전망",
@@ -1232,23 +1249,117 @@ def report_generation_node(state: AgentState) -> AgentState:
         "recommendations": "전략적 권고사항",
         "conclusion": "결론"
     }
-    
+
+    # 섹션별 상세 작성 가이드라인
+    section_guidelines = {
+        "executive_summary": """
+        - 보고서 전체의 핵심 내용을 3-5개의 주요 포인트로 요약
+        - 시장 규모, 성장률(CAGR) 등 핵심 수치를 반드시 포함
+        - 주요 트렌드와 기술 혁신을 간략히 언급
+        - 전략적 시사점을 1-2문장으로 제시
+        """,
+        "market_overview": """
+        - 현재 시장 규모와 예측 시장 규모를 구체적인 금액($)으로 제시
+        - CAGR(연평균 성장률) 수치와 기간 명시
+        - 지역별 시장 비중(북미, 유럽, 아시아태평양 등) 백분율로 제시
+        - 주요 성장 동력(예: 자동화 수요, AI 칩 발전 등)을 3-4가지 나열
+        - 가능한 경우 출처(예: Market.us 2024, IDC 2025) 명시
+        """,
+        "technology_trends": """
+        - 핵심 기술 트렌드를 3-5개 선정하여 각각 상세 설명
+        - 각 기술별로 실제 제품명이나 프로젝트명 언급(예: Google RT-2, NVIDIA Cosmos)
+        - 기술적 성능 개선 수치를 포함(예: 정확도 30% 향상, 지연시간 50ms 단축)
+        - 업계 전문 용어 적극 활용(VLA, AMR, Edge AI, Foundation Model 등)
+        - 각 기술의 산업적 의의와 적용 가능성 설명
+        """,
+        "industry_applications": """
+        - 최소 3개 이상의 주요 산업 분야 다루기(제조, 물류, 헬스케어, 자율주행 등)
+        - 각 산업별로 구체적인 사례 제시(기업명, 프로젝트명 포함)
+        - 정량적 성과 지표 포함(예: 생산성 25% 향상, 물류 처리량 40% 증가)
+        - 실증 데이터나 파일럿 프로젝트 결과 언급
+        - 각 산업에서의 도입 단계(초기/성장/성숙) 평가
+        """,
+        "key_players": """
+        - 주요 기업 5-7개를 선정하여 각각의 전략과 제품 소개
+        - 최근 투자 유치 금액, 파트너십, M&A 정보 포함
+        - 각 기업의 기술적 차별점과 시장 포지셔닝 설명
+        - 스타트업과 대기업을 구분하여 분석
+        - 주요 제품의 구체적인 스펙이나 성능 지표 언급
+        """,
+        "challenges": """
+        - 기술적 과제(예: 배터리, 정밀도, 안전성) 3-4가지
+        - 비즈니스 장벽(예: 높은 초기 비용, ROI 불확실성) 2-3가지
+        - 규제 및 윤리적 이슈(예: 안전 규제, 일자리 대체) 1-2가지
+        - 각 과제에 대한 현재 해결 시도나 대안 언급
+        - 향후 해결 전망과 예상 시점 제시
+        """,
+        "forecast": """
+        - 향후 5년간의 단계적 발전 시나리오 제시
+        - 연도별 주요 마일스톤 예측(예: 2026년 대량 배포, 2028년 표준화)
+        - 시장 침투율 전망(예: 2030년까지 제조업의 30% 도입)
+        - 기술 성숙도 로드맵(초기→성장→성숙 단계)
+        - 낙관적/보수적 시나리오 구분 제시
+        """,
+        "recommendations": """
+        - 3단계 실행 로드맵 제시(Phase 1/2/3, 각 단계별 기간 명시)
+        - 각 단계별 예상 투자 규모($50K-$2M+ 등 구체적 범위)
+        - 핵심 파트너십 전략(구체적인 벤더명이나 SI 업체명 제시)
+        - 인재 확보 계획(직무, 인원, 예상 연봉 범위 포함)
+        - 각 단계별 기대 효과와 ROI 목표 제시
+        - 성공 측정 지표(KPI) 제안
+        """,
+        "conclusion": """
+        - 보고서의 핵심 메시지를 3-4문장으로 요약
+        - Physical AI의 전략적 중요성 강조
+        - 조직이 취해야 할 즉각적 행동 1-2가지 제시
+        - 미래 전망에 대한 간결한 견해 제시
+        """
+    }
+
     report_sections = {}
-    
+
     for section_key, section_title in sections.items():
+        guidelines = section_guidelines.get(section_key, "")
+
         prompt = ChatPromptTemplate.from_messages([
-            ("system", f"""Physical AI 트렌드 보고서의 '{section_title}' 섹션을 작성하세요.
-            전문적이고 간결하며 데이터 기반의 내용으로 작성하세요."""),
-            ("user", "분석 데이터:\n{data}")
+            ("system", f"""당신은 Physical AI 분야의 시니어 애널리스트입니다.
+'{section_title}' 섹션을 공식적이고 정형화된 산업 트렌드 분석 보고서 양식에 맞춰 작성하세요.
+
+**필수 요구사항:**
+- synthesis_node에서 추출한 핵심 인사이트를 최대한 활용하세요
+- 구체적인 수치, 통계, 금액을 반드시 포함하세요
+- 실제 기업명, 제품명, 프로젝트명을 적극 언급하세요
+- 업계 전문 용어를 정확하게 사용하세요
+- 출처나 시기를 함께 제시하여 신뢰도를 높이세요
+- 정성적 서술보다는 정량적 데이터 기반으로 작성하세요
+
+**섹션별 작성 가이드라인:**
+{guidelines}
+
+**작성 스타일:**
+- 문장은 명확하고 간결하게 (1문장 2줄 이내)
+- 각 주장에 대한 근거(수치, 사례, 출처)를 반드시 제시
+- 추상적 표현(많은, 빠른, 중요한 등) 지양하고 구체적 표현 사용
+
+이 섹션은 전체 보고서의 일부이므로, 제공된 분석 데이터를 충분히 활용하여 전문성 있고 실행 가능한 내용으로 작성하세요."""),
+            ("user", """분석 데이터:
+{data}
+
+위 데이터에서 추출한 핵심 인사이트를 바탕으로 '{section_title}' 섹션을 작성하세요.
+가능한 모든 구체적인 수치, 기업명, 제품명, 사례를 포함하세요.""")
         ])
-        
+
         response = llm.invoke(
-            prompt.format_messages(data=str(state["synthesized_data"]))
+            prompt.format_messages(
+                data=str(state["synthesized_data"]),
+                section_title=section_title,
+                guidelines=guidelines
+            )
         )
         report_sections[section_key] = response.content
-    
+
     state["report_sections"] = report_sections
-    state["messages"].append("✅ 보고서 초안 생성 완료")
+    state["messages"].append("✅ 보고서 초안 생성 완료 (정형화된 트렌드 분석 양식 적용)")
     return state
 
 def extract_sources_from_data(state: AgentState) -> str:
@@ -1279,41 +1390,41 @@ def structure_node(state: AgentState) -> AgentState:
     # Markdown 형식으로 보고서 구조화
     final_report = f"""
 
----
+# 2026-2030 Physical AI 산업 트렌드 분석 보고서
 
-{sections.get('executive_summary', '')}
-
----
-
-{sections.get('market_overview', '')}
+## 핵심 요약
 
 ---
 
-{sections.get('technology_trends', '')}
+## 시장 전망
 
 ---
 
-{sections.get('industry_applications', '')}
+## 기술 트렌드
 
 ---
 
-{sections.get('key_players', '')}
+## 산업별 응용
 
 ---
 
-{sections.get('challenges', '')}
+## 주요 기업
 
 ---
 
-{sections.get('forecast', '')}
+## 도전 과제
 
 ---
 
-{sections.get('recommendations', '')}
+## 향후 5년 전망
 
 ---
 
-{sections.get('conclusion', '')}
+## 전략적 권고사항
+
+---
+
+## 결론
 
 ---
 
@@ -1385,7 +1496,6 @@ def review_node(state: AgentState) -> AgentState:
     state["search_context"]["review_feedback"] = content
     state["quality_score"] = score
     state["final_report"] += f"\n\n---\n\n## 보고서 품질 검토 결과\n\n{content}"
-    state["final_report"] += f"\n\n**종합 점수: {score:.1f}/10**\n"
     state["final_report"] += f"*보고서 생성일: {__import__('datetime').datetime.now().strftime('%Y년 %m월 %d일')}*\n*생성 시스템: Physical AI Trend Report Generator (Powered by LangGraph + Tavily AI)*"
     state["messages"].append(f"✅ 품질 검토 완료 (점수: {score:.1f}/10)")
     state["messages"].append("📝 리뷰 요약 저장")
@@ -1595,7 +1705,7 @@ if __name__ == "__main__":
     if result:
         # 보고서를 파일로 저장
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"physical_ai_report_{timestamp}.pdf"
+        filename = f"physical_ai_report_{timestamp}.md"
         
         with open(filename, "w", encoding="utf-8") as f:
             f.write(result["final_report"])
