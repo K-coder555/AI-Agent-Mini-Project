@@ -38,10 +38,6 @@ env/
 *~
 .DS_Store
 
-# Generated Reports
-*.pdf
-physical_ai_report_*.pdf
-physical_ai_report_*.md
 
 # Logs
 *.log

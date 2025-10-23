@@ -549,6 +549,14 @@ Physical AI 시장은 2024년 3.78억 달러에서 2034년 67.91억 달러로 �
 3. 인재 확보 계획:
    - Robotics Engineer 2-3명, ML Engineer 3-5명 채용 (연봉 범위: $120K-180K)
    - UC Berkeley, CMU 등 주요 대학 연구실과 인턴십 프로그램 운영
+
+참고 자료 및 출처
+- Market.us, "Physical AI Market Forecast to 2034", 2024
+URL: https://market.us/report/physical-ai-market
+- Google Research, "RT-2: Vision-Language-Action Model for Robotics"
+URL: https://ai.googleblog.com/2024/02/rt-2-vision-language-action-model-for.html
+- NVIDIA, "Cosmos: AI-Driven Simulation for Robotics", 2024
+URL: https://developer.nvidia.com/blog/cosmos-ai-driven-simulation-for-robotics/
 """
 
 REVIEW_FEW_SHOT_PROMPT = ChatPromptTemplate.from_messages([
@@ -1236,7 +1244,7 @@ def quality_check_node(state: AgentState) -> str:
 
 def report_generation_node(state: AgentState) -> AgentState:
     """보고서 초안 생성 - 공식적이고 정형화된 트렌드 분석 보고서 양식"""
-    llm = ChatOpenAI(model="gpt-4", temperature=0.2)
+    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.2)
 
     sections = {
         "executive_summary": "핵심 요약",
@@ -1326,6 +1334,7 @@ def report_generation_node(state: AgentState) -> AgentState:
 '{section_title}' 섹션을 공식적이고 정형화된 산업 트렌드 분석 보고서 양식에 맞춰 작성하세요.
 
 **필수 요구사항:**
+- 섹션 제목을 포함하지 말고 본론만 작성하세요
 - synthesis_node에서 추출한 핵심 인사이트를 최대한 활용하세요
 - 구체적인 수치, 통계, 금액을 반드시 포함하세요
 - 실제 기업명, 제품명, 프로젝트명을 적극 언급하세요
@@ -1394,37 +1403,55 @@ def structure_node(state: AgentState) -> AgentState:
 
 ## 핵심 요약
 
+{sections.get("executive_summary", "")}
+
 ---
 
 ## 시장 전망
+
+{sections.get("market_overview", "")}
 
 ---
 
 ## 기술 트렌드
 
+{sections.get("technology_trends", "")}
+
 ---
 
 ## 산업별 응용
+
+{sections.get("industry_applications", "")}
 
 ---
 
 ## 주요 기업
 
+{sections.get("key_players", "")}
+
 ---
 
 ## 도전 과제
+
+{sections.get("challenges", "")}
 
 ---
 
 ## 향후 5년 전망
 
+{sections.get("forecast", "")}
+
 ---
 
 ## 전략적 권고사항
 
+{sections.get("recommendations", "")}
+
 ---
 
 ## 결론
+
+{sections.get("conclusion", "")}
 
 ---
 
