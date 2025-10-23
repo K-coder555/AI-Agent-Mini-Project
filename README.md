@@ -1,4 +1,4 @@
-# 🤖 Physical AI Trend Report Generator
+# Physical AI Trend Report Generator
 
 **LangGraph + Tavily AI 기반 자동 트렌드 분석 보고서 생성 에이전트**
 
@@ -24,93 +24,116 @@
 
 ---
 
-## ✨ 주요 기능
+## 주요 기능
 
-### 🔍 **다차원 자동 리서치**
+### **다차원 자동 리서치**
 - **시장 전망**: Physical AI 시장 규모, 성장률, 투자 동향 분석
 - **기술 트렌드**: 머신러닝, 센서 기술, AI-로봇 융합 등 최신 기술 동향
 - **산업별 응용**: 헬스케어, 물류, 스마트시티, 제조업 등 분야별 활용 사례
 - **주요 기업**: 글로벌 선도 기업 및 스타트업 동향
 - **도전과제**: 윤리, 규제, 데이터 프라이버시 등 핵심 이슈
 
-### 🧠 **지능형 품질 관리**
+### **지능형 품질 관리**
 - AI 기반 자동 보고서 품질 평가 (10점 만점)
-- Few-shot Learning으로 전문 보고서 수준 학습
-- 점수 7.0 미만 시 자동 개선 및 재생성
+- Few-shot Prompting으로 전문적인 보고서 기준 확립
+- Total score 임계치 미만 시 자동 개선 및 재생성
 - 5가지 평가 기준: 내용 완성도, 데이터 정확성, 구조 논리성, 실행 가능성, 전문성
 
-### 📊 **전문적인 PDF 보고서**
+### **전문적인 PDF 보고서**
 - A4 사이즈, 한글 지원
 - 다채로운 색상 팔레트와 공식 문서 스타일
 - 목차, 본문, 결론, 참고자료, 품질 평가 포함
 - 페이지 번호, 생성일, 출처 자동 삽입
 
-### ⚡ **병렬 처리 및 최적화**
+### **병렬 처리 및 최적화**
 - 5개 리서치 노드 동시 실행으로 시간 단축
 - Tavily AI Advanced Search로 고품질 정보 수집
 - 조건부 워크플로우로 효율적인 자원 활용
 
 ---
 
-## 🏗️ 시스템 아키텍처
+## 시스템 아키텍처
 
 ```mermaid
-graph TB
-    Start([사용자 쿼리]) --> Planning[기획 노드]
+
+graph TD
+    Start([시작: 사용자 요청]) --> Init[State 초기화]
     
-    Planning --> Market[시장 조사]
-    Planning --> Tech[기술 조사]
-    Planning --> Industry[산업 조사]
-    Planning --> Company[기업 조사]
-    Planning --> Challenge[도전과제 조사]
+    Init --> Planner[Planning Node<br/>리서치 계획 수립]
     
-    Market --> Synthesis[데이터 종합]
-    Tech --> Synthesis
-    Industry --> Synthesis
-    Company --> Synthesis
-    Challenge --> Synthesis
+    Planner --> |계획 완료| ResearchRouter{Research<br/>Router}
     
-    Synthesis --> QCheck{품질 확인}
-    QCheck -->|불충분| Planning
-    QCheck -->|충분| Generate[보고서 생성]
+    ResearchRouter --> |시장 데이터| Market[Market Research Node<br/>시장 규모, 성장률 수집]
+    ResearchRouter --> |기술 동향| Tech[Tech Research Node<br/>VLA, Foundation Models]
+    ResearchRouter --> |산업 사례| Industry[Industry Research Node<br/>제조, 물류, 헬스케어]
+    ResearchRouter --> |기업 분석| Company[Company Research Node<br/>주요 기업, 경쟁 환경]
+    ResearchRouter --> |도전과제| Challenge[Challenge Research Node<br/>장벽, 위험 요소]
     
-    Generate --> Structure[구조화]
-    Structure --> Review[품질 검토]
+    Market --> Synthesizer[Synthesis Node<br/>데이터 통합 및 분석]
+    Tech --> Synthesizer
+    Industry --> Synthesizer
+    Company --> Synthesizer
+    Challenge --> Synthesizer
     
-    Review --> FCheck{최종 확인}
-    FCheck -->|점수<7.0| Refine[보고서 개선]
-    FCheck -->|점수≥7.0| Format[PDF 생성]
+    Synthesizer --> QualityCheck{Quality<br/>Check}
     
+    QualityCheck --> |데이터 부족| ResearchRouter
+    QualityCheck --> |충분| ReportGen[Report Generation Node<br/>보고서 작성]
+    
+    ReportGen --> Structure[Structure Node<br/>섹션별 콘텐츠 생성]
+    
+    Structure --> Review[Review Node<br/>품질 검증 및 개선]
+    
+    Review --> FinalCheck{Final<br/>Quality Check}
+    
+    FinalCheck --> |개선 필요| Refine[Refinement Node<br/>내용 보완 및 수정]
     Refine --> Structure
-    Format --> End([완료])
     
-    style Start fill:#e1f5ff
-    style End fill:#d4edda
-    style QCheck fill:#fff3cd
-    style FCheck fill:#fff3cd
-    style Format fill:#d4edda
+    FinalCheck --> |승인| Format[Formatting Node<br/>최종 포맷팅]
+    
+    Format --> End([완료: 보고서 출력])
+    
+    style Start fill:#e1f5e1
+    style End fill:#e1f5e1
+    style Planner fill:#fff4e6
+    style ResearchRouter fill:#e3f2fd
+    style Market fill:#f3e5f5
+    style Tech fill:#f3e5f5
+    style Industry fill:#f3e5f5
+    style Company fill:#f3e5f5
+    style Challenge fill:#f3e5f5
+    style Synthesizer fill:#fff9c4
+    style QualityCheck fill:#ffccbc
+    style ReportGen fill:#c8e6c9
+    style Structure fill:#c8e6c9
+    style Review fill:#ffccbc
+    style FinalCheck fill:#ffccbc
+    style Refine fill:#ffe0b2
+    style Format fill:#b2dfdb
 ```
 
 ### 주요 컴포넌트
 
 | 컴포넌트 | 역할 | 기술 |
 |---------|------|------|
-| **Planning Node** | 조사 계획 수립 | GPT-4o-mini |
+| **Planning Node** | 사용자 Query에 따른 조사 계획 수립 | GPT-4o-mini |
 | **Research Nodes** | 멀티 소스 데이터 수집 (5개 노드 병렬) | Tavily Search API |
 | **Synthesis Node** | 데이터 통합 및 분석 | GPT-4o-mini |
-| **Review Node** | AI 품질 평가 (Few-shot) | GPT-4o-mini |
-| **Refinement Node** | 개선 및 재생성 | GPT-4o-mini |
-| **Formatting Node** | PDF 변환 | ReportLab |
+| **Report Generation Node** | 보고서 초안 작성 | GPT-4o-mini |
+| **Structure Node** | 보고서 구조화 작업 진행 | GPT-4o-mini |
+| **Review Node** | 보고서 품질 평가 (Few-shot-Prompting) | GPT-4o-mini |
+| **Refinement Node** | AI 피드백에 따른 보고서 보완 | GPT-4o-mini |
+| **Formatting Node** | 최종 보고서 포맷팅 | ReportLab |
 
 ---
 
-## 📦 설치 방법
+## 설치 방법
 
 ### 1. 저장소 클론
 
 ```bash
-git clone https://github.com/yourusername/physical-ai-report-generator.git
-cd physical-ai-report-generator
+git clone https://github.com/K-coder555/AI-Agent-Mini-Project.git
+cd AI-Agent-Mini-Project
 ```
 
 ### 2. 가상환경 설정 (권장)
@@ -151,7 +174,7 @@ NanumGothic 폰트가 시스템에 설치되어 있어야 합니다:
 
 ---
 
-## 🚀 사용 방법
+## 사용 방법
 
 ### 1. 환경 변수 설정
 
@@ -165,7 +188,7 @@ TAVILY_API_KEY=tvly-your-tavily-api-key
 ### 2. 실행
 
 ```python
-from physical_ai_agent import run_agent
+from Agent import run_agent
 
 # 기본 실행
 query = "향후 5년 이내 기업에서 관심있게 봐야할 Physical AI 트렌드"
@@ -175,7 +198,7 @@ result = run_agent(query)
 **또는 커맨드라인:**
 
 ```bash
-python physical_ai_agent.py
+python Agent.py
 ```
 
 ### 3. 결과 확인
@@ -251,7 +274,7 @@ python physical_ai_agent.py
 
 ---
 
-## 🔄 워크플로우
+## 워크플로우
 
 ### Phase 1: 기획 및 조사 (Planning & Research)
 
@@ -274,14 +297,16 @@ python physical_ai_agent.py
    └─ 수집된 데이터 통합 및 분석
 
 4. Quality Check (조건부)
-   ├─ 충분 → Report Generation
-   └─ 부족 → Planning (재조사)
+   ├─ 데이터 양 충분 → Report Generation
+   └─ 데이터 양 부족 → Planning (검색 Query 수정하여 재조사)
 
 5. Report Generation
-   └─ 각 섹션별 보고서 작성
+   └─ 노드 수집 정보 기반 보고서 작성
 
 6. Structure Node
-   └─ 목차, 결론, 출처 추가
+   └─ 보고서 구조화
+
+출처 추가
 ```
 
 ### Phase 3: 검토 및 최적화 (Review & Refinement)
@@ -295,15 +320,15 @@ python physical_ai_agent.py
    └─ 점수 < 7.0 → Refinement
 
 9. Refinement Node (필요시)
-   └─ 피드백 기반 보고서 개선
+   └─ AI 평가 피드백 반영하여 보고서 재작성
 
 10. Formatting Node
-    └─ PDF 생성 및 저장
+    └─ 최종 보고서 PDF 생성 및 저장
 ```
 
 ---
 
-## 📸 출력 예시
+## 출력 예시
 
 ### 콘솔 로그
 
@@ -338,14 +363,15 @@ python physical_ai_agent.py
 
 ### PDF 보고서 샘플
 
-<img src="docs/sample_report_page1.png" width="400" alt="보고서 1페이지">
-<img src="docs/sample_report_page5.png" width="400" alt="보고서 5페이지">
+<img src="physical_ai_report_20251023_142214.pdf" width="400" alt="PDF 보고서">
+<img src="physical_ai_report_20251023_142214.md" width="400" alt="Markdown 보고서">
 
-*실제 생성된 보고서는 10페이지 내외이며, 전문적인 레이아웃과 색상을 사용합니다.*
+
+*실제 에이전트가 생성한 보고서 입니다.*
 
 ---
 
-## 🛠️ 기술 스택
+## 기술 스택
 
 ### Core Technologies
 
@@ -476,13 +502,13 @@ print(json.dumps(state["market_data"], indent=2, ensure_ascii=False))
 
 | 단계 | 평균 시간 | 최적화 방법 |
 |-----|----------|-----------|
-| Planning | 5초 | - |
-| Research (5개 노드) | 30-45초 | 병렬 실행 |
-| Synthesis | 10초 | - |
-| Report Generation | 20-30초 | 토큰 수 제한 |
-| Review | 10초 | - |
-| PDF Generation | 5초 | - |
-| **총 소요 시간** | **1.5-2분** | - |
+| Planning | 15초 | 5초 |
+| Research (5개 노드) | 60-80초 | 30-45초 |
+| Synthesis | 30-40초 | 10초 |
+| Report Generation | 50-80초 | 20-30초 |
+| Review | 30초 | 10초 |
+| PDF Generation | 5초 | 5초 |
+| **총 소요 시간** | **3-5분** | **1.5-2분** |
 
 ### 비용 최적화
 
@@ -499,7 +525,7 @@ if state["iteration_count"] < 1:  # 2 → 1
 
 ---
 
-## 🤝 기여하기
+## 기여하기
 
 기여를 환영합니다! 다음 방법으로 참여하세요:
 
@@ -520,7 +546,7 @@ if state["iteration_count"] < 1:  # 2 → 1
 
 ---
 
-## 📝 라이선스
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
@@ -538,7 +564,7 @@ in the Software without restriction...
 
 ## 👥 저자
 
-- **Your Name** - *Initial work* - [GitHub Profile](https://github.com/yourusername)
+- **L.J.H** - *Initial work* - [GitHub Profile](https://github.com/K-coder555)
 
 ---
 
@@ -555,9 +581,7 @@ in the Software without restriction...
 
 ## 📞 연락처
 
-- 이메일: your.email@example.com
-- 이슈: [GitHub Issues](https://github.com/yourusername/physical-ai-report-generator/issues)
-- 토론: [GitHub Discussions](https://github.com/yourusername/physical-ai-report-generator/discussions)
+- 이메일: yewnsgmlrns@naver.com
 
 ---
 
@@ -574,6 +598,6 @@ in the Software without restriction...
 
 **⭐ 이 프로젝트가 유용하다면 Star를 눌러주세요! ⭐**
 
-Made with ❤️ by AI Enthusiasts
+Made by L.J.H
 
 </div>
